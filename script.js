@@ -20,6 +20,7 @@ function setup() {
   newTitleInput = document.getElementById("new-title");
   newDescriptionInput = document.getElementById("new-description");
   addBookmarkForm = document.getElementById("add-bookmark-form");
+  deleteBookmarksButton = document.getElementById("delete-bookmarks-button");
  
   // Fill dropdown with user ids
   populateUserDropdown(); 
@@ -31,7 +32,8 @@ function setup() {
   userDropdown.addEventListener("change", handleUserChange); 
   // When new bookmark form is submitted
   addBookmarkForm.addEventListener("submit", handleAddBookmark);
-
+  // When delete bookmarks button is clicked
+  deleteBookmarksButton.addEventListener("click", handleDeleteBookmarks);
 
 }
 
@@ -48,9 +50,10 @@ function handleAddBookmark(event) {
     url: newURLInput.value.trim(),
     title: newTitleInput.value.trim(),
     description: newDescriptionInput.value.trim(),
+    timestamp: new Date().toString(), // Store readable date/time
   };
 
-  // Basic validation
+  // Basic validation for required fields
   if (!newBookmark.url || !newBookmark.title) {
     alert("URL and Title are required fields.");
     return;
@@ -85,6 +88,25 @@ function handleUserChange(event) {
   // Show main content
   mainContent.removeAttribute("hidden");
   displayBookmarks(currentUser);
+}
+
+// Delete all bookmarks for the current user
+function handleDeleteBookmarks() {
+  if (!currentUser) {
+    alert("Please select a user before deleting bookmarks.");
+    return;
+  }
+
+  const confirmClear = confirm(
+    "Are you sure you want to delete all bookmarks for this user?"
+  );
+  if (!confirmClear) return;
+
+  // Clear bookmarks for the current user
+  clearData(currentUser);
+  // Refresh display
+  displayBookmarks(currentUser);
+  alert("Agenda cleared!");
 }
 
 
@@ -134,16 +156,22 @@ function displayBookmarks(userId) {
 
   // Render valid bookmarks
   bookmarksDisplay.innerHTML = orderedBookmarks
-    .map(
-      (bookmark) => `
-        <div class ="bookmark-item">
-          <strong>${bookmark.title}</strong>
-          <span>${bookmark.description || ""}</span><br/>
-          <a href="${bookmark.url}" target="_blank">${bookmark.url}</a>
-        </div>
-      `
-    )
-    .join("");
+  .map((bookmark) => {
+    const date = new Date(bookmark.timestamp); // parse ISO string
+    const formattedDate = date.toLocaleString(); // toLocalString get the format "10/19/2025, 15:45:30"
+    
+    return `
+      <div class="bookmark-item">
+        <p>
+          <a href="${bookmark.url}" target="_blank"><strong>${bookmark.title}</strong></a>
+          — ${bookmark.description || ""}
+        </p>
+        <small>Added: ${formattedDate}</small>
+      </div>
+    `;
+  })
+  .join("");
+
 }
 
 // clear bookmarks of a user 
