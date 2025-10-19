@@ -1,21 +1,76 @@
 // script.js
 
-import { getUserIds, getData } from "./storage.js";
+import { getUserIds, getData, setData, clearData} from "./storage.js";
 
 let userDropdown;
 let bookmarksDisplay;
 let mainContent;
+let newURLInput;
+let newTitleInput;
+let newDescriptionInput;
+let addBookmarkForm;
+let deleteBookmarksButton;
 let currentUser;
 
 function setup() {
   userDropdown = document.getElementById("user-dropdown");
   mainContent = document.getElementById("main-content");
   bookmarksDisplay = document.getElementById("bookmarks-display");
+  newURLInput = document.getElementById("new-url");
+  newTitleInput = document.getElementById("new-title");
+  newDescriptionInput = document.getElementById("new-description");
+  addBookmarkForm = document.getElementById("add-bookmark-form");
+ 
+  // Fill dropdown with user ids
+  populateUserDropdown(); 
+  
 
-  populateUserDropdown();
-  userDropdown.addEventListener("change", handleUserChange);
+  // ----------- Event listeners ----------
+
+  // When user selection changes
+  userDropdown.addEventListener("change", handleUserChange); 
+  // When new bookmark form is submitted
+  addBookmarkForm.addEventListener("submit", handleAddBookmark);
+
+
 }
 
+// Function to add a new bookmark for the current user
+function handleAddBookmark(event) {
+  event.preventDefault(); // Prevent form submission
+
+  if (!currentUser) {
+    alert("Please select a user before adding a bookmark.");
+    return;
+  }
+
+  const newBookmark = {
+    url: newURLInput.value.trim(),
+    title: newTitleInput.value.trim(),
+    description: newDescriptionInput.value.trim(),
+  };
+
+  // Basic validation
+  if (!newBookmark.url || !newBookmark.title) {
+    alert("URL and Title are required fields.");
+    return;
+  }
+
+  // Get existing bookmarks
+  const existingData = getData(currentUser) || [];
+  existingData.push(newBookmark); // Add new bookmark
+
+  // Save updated bookmarks
+  setData(currentUser, existingData);
+
+  // Refresh display
+  displayBookmarks(currentUser);
+
+  // Reset form
+  addBookmarkForm.reset();
+}
+
+// Function to display bookmarks when the user selection changes
 function handleUserChange(event) {
   currentUser = event.target.value;
 
@@ -32,9 +87,11 @@ function handleUserChange(event) {
   displayBookmarks(currentUser);
 }
 
+
+
+// Populate the user dropdown with user ids
 function populateUserDropdown() {
   const userIds = getUserIds();
-  console.log("User IDs:", userIds);
 
   userDropdown.innerHTML = '<option value="">No user selected</option>';
   userIds.forEach((userId) => {
@@ -45,28 +102,51 @@ function populateUserDropdown() {
   });
 }
 
-function displayBookmarks(userId) {
-  const data = getData(userId);
 
-  if (!data || data.length === 0) {
+
+// Display bookmarks for the selected user
+function displayBookmarks(userId) {
+  const data = getData(userId); // Expecting an array of bookmarks 
+  console.log("Bookmarks for user", userId, ":", data);
+
+  // If there's no valid data or not an array, show message
+  if (!Array.isArray(data) || data.length === 0) {
     bookmarksDisplay.innerHTML =
       "<p>No bookmarks yet. Add one to get started!</p>";
     return;
   }
 
-  // We can later expand this to actually show bookmarks
-  
-  /*bookmarksDisplay.innerHTML = data
+  // Filter out invalid or empty entries
+  const validBookmarks = data.filter(
+    (b) => b && b.title && b.url
+  );
+
+  // If no valid bookmarks, show message
+  if (validBookmarks.length === 0) {
+    bookmarksDisplay.innerHTML =
+      "<p>No bookmarks yet. Add one to get started!</p>";
+    return;
+  }
+
+  // Order reverse order so most recent is first
+  const orderedBookmarks = [...validBookmarks].reverse();
+
+
+  // Render valid bookmarks
+  bookmarksDisplay.innerHTML = orderedBookmarks
     .map(
       (bookmark) => `
-        <div>
-          <h3>${bookmark.title}</h3>
-          <p>${bookmark.description}</p>
+        <div class ="bookmark-item">
+          <strong>${bookmark.title}</strong>
+          <span>${bookmark.description || ""}</span><br/>
           <a href="${bookmark.url}" target="_blank">${bookmark.url}</a>
         </div>
       `
     )
-    .join(""); */
+    .join("");
 }
+
+// clear bookmarks of a user 
+
 
 document.addEventListener("DOMContentLoaded", setup);
