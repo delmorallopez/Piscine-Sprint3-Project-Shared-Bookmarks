@@ -1,12 +1,72 @@
-// This is a placeholder file which shows how you can access functions defined in other files.
-// It can be loaded into index.html.
-// You can delete the contents of the file once you have understood how it works.
-// Note that when running locally, in order to open a web page which uses modules, you must serve the directory over HTTP e.g. with https://www.npmjs.com/package/http-server
-// You can't open the index.html file using a file:// URL.
+// script.js
 
-import { getUserIds } from "./storage.js";
+import { getUserIds, getData } from "./storage.js";
 
-window.onload = function () {
-  const users = getUserIds();
-  document.querySelector("body").innerText = `There are ${users.length} users`;
-};
+let userDropdown;
+let bookmarksDisplay;
+let mainContent;
+let currentUser;
+
+function setup() {
+  userDropdown = document.getElementById("user-dropdown");
+  mainContent = document.getElementById("main-content");
+  bookmarksDisplay = document.getElementById("bookmarks-display");
+
+  populateUserDropdown();
+  userDropdown.addEventListener("change", handleUserChange);
+}
+
+function handleUserChange(event) {
+  currentUser = event.target.value;
+
+  if (!currentUser) {
+    // Hide main content
+    mainContent.setAttribute("hidden", "");
+    bookmarksDisplay.innerHTML =
+      "<p>Please select a user to view their bookmarks.</p>";
+    return;
+  }
+
+  // Show main content
+  mainContent.removeAttribute("hidden");
+  displayBookmarks(currentUser);
+}
+
+function populateUserDropdown() {
+  const userIds = getUserIds();
+  console.log("User IDs:", userIds);
+
+  userDropdown.innerHTML = '<option value="">No user selected</option>';
+  userIds.forEach((userId) => {
+    const option = document.createElement("option");
+    option.value = userId;
+    option.textContent = `User ${userId}`;
+    userDropdown.appendChild(option);
+  });
+}
+
+function displayBookmarks(userId) {
+  const data = getData(userId);
+
+  if (!data || data.length === 0) {
+    bookmarksDisplay.innerHTML =
+      "<p>No bookmarks yet. Add one to get started!</p>";
+    return;
+  }
+
+  // We can later expand this to actually show bookmarks
+  
+  /*bookmarksDisplay.innerHTML = data
+    .map(
+      (bookmark) => `
+        <div>
+          <h3>${bookmark.title}</h3>
+          <p>${bookmark.description}</p>
+          <a href="${bookmark.url}" target="_blank">${bookmark.url}</a>
+        </div>
+      `
+    )
+    .join(""); */
+}
+
+document.addEventListener("DOMContentLoaded", setup);
