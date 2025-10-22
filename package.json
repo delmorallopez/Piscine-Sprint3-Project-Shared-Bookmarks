@@ -4,6 +4,7 @@
   "description": "As developers, we spend a lot of time reading articles on the web and we often want to record useful links to come back to them later. It is fun to share your bookmarks with others so that they can find interesting and useful links too.",
   "main": "script.js",
   "scripts": {
+    "start": "http-server .",
     "test": "jest"
   },
   "repository": {
@@ -19,5 +20,8 @@
   "homepage": "https://github.com/delmorallopez/Piscine-Sprint3-Project-Shared-Bookmarks#readme",
   "devDependencies": {
     "jest": "^30.2.0"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
   }
 }
