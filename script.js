@@ -39,7 +39,7 @@ function setup() {
 
 // Function to add a new bookmark for the current user
 function handleAddBookmark(event) {
-  event.preventDefault(); // Prevent form submission
+  event.preventDefault(); // No reloading the page. Not the normal form submission. Handle what happens myself with JavaScript
 
   if (!currentUser) {
     alert("Please select a user before adding a bookmark.");
@@ -113,14 +113,14 @@ function handleDeleteBookmarks() {
 
 // Populate the user dropdown with user ids
 function populateUserDropdown() {
-  const userIds = getUserIds();
+  const userIds = getUserIds(); // get array of user ids
 
-  userDropdown.innerHTML = '<option value="">No user selected</option>';
-  userIds.forEach((userId) => {
+  userDropdown.innerHTML = '<option value="">No user selected</option>'; // default option
+  userIds.forEach((userId) => {  // add each user id as an option
     const option = document.createElement("option");
     option.value = userId;
     option.textContent = `User ${userId}`;
-    userDropdown.appendChild(option);
+    userDropdown.appendChild(option); // add option to dropdown
   });
 }
 
@@ -129,7 +129,6 @@ function populateUserDropdown() {
 // Display bookmarks for the selected user
 function displayBookmarks(userId) {
   const data = getData(userId); // Expecting an array of bookmarks 
-  console.log("Bookmarks for user", userId, ":", data);
 
   // If there's no valid data or not an array, show message
   if (!Array.isArray(data) || data.length === 0) {
